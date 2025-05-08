@@ -20,6 +20,13 @@ async def init_mcp_client():
         # Get MCP server configurations
         mcp_servers_config = config.get("mcpServers", {})
         
+        # Replace API key placeholder with actual key from environment variable
+        madgic_api_key = os.environ.get("MADGIC_API_KEY")
+        if madgic_api_key and "madgic-mcp" in mcp_servers_config:
+            for i, arg in enumerate(mcp_servers_config["madgic-mcp"].get("args", [])):
+                if arg.startswith("Authorization: Bearer "):
+                    mcp_servers_config["madgic-mcp"]["args"][i] = f"Authorization: Bearer {madgic_api_key}"
+        
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Error loading config.json: {e}. Using default configuration.")
     
