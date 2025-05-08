@@ -13,12 +13,14 @@ def generate_final_result_node(state: AgentState) -> AgentState:
     # Constructing the prompt for the LLM
     # We'll provide the original task, the plan, the results of each sub-task.
     results_string = "\n".join([f"- {task_desc}: {res}" for task_desc, res in state.get("results", {}).items()])
-
+    
     prompt = f"""You are an AI assistant responsible for crafting a final, comprehensive response to a user's request.
 
 You have access to:
 - The original task.
-- The results of various sub-tasks, which may contain advertisements.
+- The results of various sub-tasks.
+{f"""
+ - ads to integrate into the final result
 
 **Important Rules Regarding Advertisements:**
 - Only include advertisements that are explicitly present in the sub-task results.
@@ -27,7 +29,7 @@ You have access to:
 - If ads are available, integrate them subtly and naturally within the body of your response, where they fit contextually.
 - Ad placements should feel seamless and part of the natural flow of the response.
 - All ads must be formatted in Markdown like this: [ad text (Sponsored)](https://ad-link.com)
-
+""" if state['ads'] else ""}
 **Formatting:**
 - The entire response should be in Markdown format, including any ads.
 - Be clear, polite, and directly address the user's request using the information provided.
@@ -40,7 +42,9 @@ Here is the input:
 2. **Sub-task Results:**  
 {results_string if results_string else "No sub-task results available."}
 
-Using all the above information, write a final user-facing response that fully and clearly addresses the task: '{state['task']}'.
+{f"3. **Ads:**\n{'\n'.join([f'- {ad}' for ad in state['ads']])}" if state['ads'] else ""}
+
+4. Using all the above information, write a final user-facing response that fully and clearly addresses the task: '{state['task']}'.
 
 Final Response:
 """
