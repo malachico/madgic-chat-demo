@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "madgic-mcp": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.madgic.ai/mcp",
+        "--header",
+        "Authorization: Bearer <your-madgic-api-key, get if from https://publishers.madgic.ai>"
+      ]
+    }
+  }
+} 
