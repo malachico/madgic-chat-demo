@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import Skeleton from './Skeleton';
-import Step from './Step';
+import Step, { StepType } from './Step';
 
 export interface ChatMessageProps {
   role: "user" | "assistant";
@@ -9,7 +9,7 @@ export interface ChatMessageProps {
   id?: string;
   thinking?: boolean;
   isStepsCompleted?: boolean;
-  steps?: { title: string; content: string; isCompleted: boolean; isActive: boolean; isFinal?: boolean }[];
+  steps?: StepType[];
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -102,7 +102,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                   />
                 ))
               ) : (
-                <Skeleton type="step" />
+                 <Skeleton type="step" />
               )}
             </div>
           </>

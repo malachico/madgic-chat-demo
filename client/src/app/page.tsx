@@ -3,9 +3,9 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import ChatInput from './components/ChatInput';
 import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
 import Welcome from './components/Welcome';
-import { sendAgentTask } from './services/api';
+import { sendAgentTask, sendChatbotQuery } from './services/api';
 import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
-import { Step } from "./components/Step";
+import { StepType } from "./components/Step";
 
 // Styles
 const gradientTextStyle = {
@@ -16,10 +16,13 @@ const gradientTextStyle = {
   display: 'inline-block'
 };
 
+type Mode = 'agent' | 'chatbot';
+
 export default function Home() {
   const [message, setMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<ChatMessageProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [mode, setMode] = useState<Mode>('agent');
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-scroll to bottom of chat when messages change
@@ -59,90 +62,103 @@ export default function Home() {
     setMessage("");
 
     try {
-      // Send task to API
-      const response = await sendAgentTask(message);
+      if (mode === 'agent') {
+        // Handle agent mode
+        const response = await sendAgentTask(message);
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error("Failed to get response reader");
+        }
 
-      // Process the SSE stream
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error("Failed to get response reader");
-      }
+        const decoder = new TextDecoder();
+        let currentThinking = "";
+        let finalResponse = "";
+        let steps: StepType[] = [];
 
-      const decoder = new TextDecoder();
-      let currentThinking = "";
-      let finalResponse = "";
-      let steps: Step[] = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+          const text = decoder.decode(value);
+          const events = parseSSEEvents(text);
 
-        const text = decoder.decode(value);
-        const events = parseSSEEvents(text);
-
-        for (const event of events) {
-          if (event.event === "update") {
-            try {
-              const data = JSON.parse(event.data);
-              if (data.step && data.result) {
-                // Format the step result for display
-                const stepResult = formatStepResult(data.result);
-                
-                // Add to steps array for structured display
-                steps = [
-                  ...steps, 
-                  {
-                    title: data.step,
-                    content: stepResult,
-                    isCompleted: true,
-                    isActive: false,
-                    isFinal: data.is_final
+          for (const event of events) {
+            if (event.event === "update") {
+              try {
+                const data = JSON.parse(event.data);
+                if (data.step && data.result) {
+                  // Format the step result for display
+                  const stepResult = formatStepResult(data.result);
+                  
+                  // Add to steps array for structured display
+                  steps = [
+                    ...steps, 
+                    {
+                      title: data.step,
+                      content: stepResult,
+                      isCompleted: true,
+                      isActive: false,
+                      isFinal: data.is_final
+                    }
+                  ];
+                  
+                  // Mark the latest step as active
+                  if (steps.length > 0) {
+                    steps = steps.map((step, index) => ({
+                      ...step,
+                      isActive: index === steps.length - 1 && !data.is_final
+                    }));
                   }
-                ];
-                
-                // Mark the latest step as active
-                if (steps.length > 0) {
-                  steps = steps.map((step, index) => ({
-                    ...step,
-                    isActive: index === steps.length - 1 && !data.is_final
-                  }));
+
+                  // Update thinking content for legacy support
+                  currentThinking = `${currentThinking}\n**${data.step}**:\n\`\`\`markdown\n${stepResult}\n\`\`\``;
+
+                  if (data.is_final && data.final_result) {
+                    finalResponse = data.final_result;
+                    setIsLoading(false);
+
+                    // Update the existing thinking message to stop thinking and mark steps as completed
+                    setChatHistory((prev) =>
+                      updateChat(prev, responseId, currentThinking, false, true, steps)
+                    );
+
+                    // Create a new message for the final response with a new unique ID
+                    const finalMessageId = Date.now().toString() + '_final';
+                    setChatHistory((prev) => [
+                      ...prev,
+                      { role: "assistant", content: finalResponse, id: finalMessageId, thinking: false }
+                    ]);
+                  } else {
+                    // Update the message in chat history with structured steps
+                    setChatHistory((prev) =>
+                      updateChat(prev, responseId, currentThinking, true, false, steps)
+                    );
+                  }
                 }
 
-                // Update thinking content for legacy support
-                currentThinking = `${currentThinking}\n**${data.step}**:\n\`\`\`markdown\n${stepResult}\n\`\`\``;
-
-                if (data.is_final && data.final_result) {
-                  finalResponse = data.final_result;
-                  setIsLoading(false);
-
-                  // Update the existing thinking message to stop thinking and mark steps as completed
+                if (data.error) {
                   setChatHistory((prev) =>
-                    updateChat(prev, responseId, currentThinking, false, true, steps)
-                  );
-
-                  // Create a new message for the final response with a new unique ID
-                  const finalMessageId = Date.now().toString() + '_final';
-                  setChatHistory((prev) => [
-                    ...prev,
-                    { role: "assistant", content: finalResponse, id: finalMessageId, thinking: false }
-                  ]);
-                } else {
-                  // Update the message in chat history with structured steps
-                  setChatHistory((prev) =>
-                    updateChat(prev, responseId, currentThinking, true, false, steps)
+                    updateChat(prev, responseId, `Error: ${data.error}`, false)
                   );
                 }
+              } catch (err) {
+                console.error("Error parsing SSE event data:", err);
               }
-
-              if (data.error) {
-                setChatHistory((prev) =>
-                  updateChat(prev, responseId, `Error: ${data.error}`, false)
-                );
-              }
-            } catch (err) {
-              console.error("Error parsing SSE event data:", err);
             }
           }
+        }
+      } else {
+        // Handle chatbot mode
+        const response = await sendChatbotQuery(message);
+        
+        if (response.status === 'success' && response.response) {
+          setChatHistory((prev) =>
+            updateChat(prev, responseId, response.response, false)
+          );
+        } else {
+          setChatHistory((prev) =>
+            updateChat(prev, responseId, `Error: ${response.error || 'Unknown error'}`, false)
+          );
         }
       }
     } catch (error) {
@@ -163,10 +179,34 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
-      {/* Header area with new chat button */}
+      {/* Header area with new chat button and mode selection */}
       <header className="bg-white bg-opacity-80 backdrop-blur-sm border-b border-gray-200 py-3 px-6 z-10 sticky top-0">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold" style={gradientTextStyle}>AI Agent</h1>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-bold" style={gradientTextStyle}>AI Assistant</h1>
+            <div className="flex items-center space-x-2 bg-gray-100 rounded-full p-1">
+              <button
+                onClick={() => setMode('agent')}
+                className={`px-4 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+                  mode === 'agent'
+                    ? 'bg-white shadow-sm text-purple-600'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                Agent
+              </button>
+              <button
+                onClick={() => setMode('chatbot')}
+                className={`px-4 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+                  mode === 'chatbot'
+                    ? 'bg-white shadow-sm text-purple-600'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                Chatbot
+              </button>
+            </div>
+          </div>
           {chatHistory.length > 0 && (
             <button
               onClick={handleNewChat}

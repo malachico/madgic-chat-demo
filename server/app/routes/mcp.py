@@ -4,8 +4,10 @@ from typing import Dict, Any, Optional
 from ..services.agent_service import run_agent_task
 from fastapi.responses import StreamingResponse, RedirectResponse
 from sse_starlette.sse import EventSourceResponse
+from langchain_google_genai import ChatGoogleGenerativeAI
 import json
 import asyncio
+import os
 
 router = APIRouter()
 
@@ -16,6 +18,16 @@ class MCPRequest(BaseModel):
 class MCPResponse(BaseModel):
     status: str
     result: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+class GeminiRequest(BaseModel):
+    prompt: str
+    temperature: Optional[float] = 0.7
+    model: Optional[str] = "models/gemini-2.0-flash"
+
+class GeminiResponse(BaseModel):
+    status: str
+    response: Optional[str] = None
     error: Optional[str] = None
 
 @router.get("/")
@@ -122,6 +134,29 @@ async def handle_mcp_sync_request(request: MCPRequest):
 
     except Exception as e:
         # Catch any exceptions during the process
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+@router.post("/query", response_model=GeminiResponse)
+async def handle_gemini_request(request: GeminiRequest):
+    try:
+        # Initialize Gemini model
+        llm = ChatGoogleGenerativeAI(
+            model=request.model,
+            temperature=request.temperature
+        )
+        
+        # Get response from Gemini
+        response = await llm.ainvoke(request.prompt)
+        
+        return GeminiResponse(
+            status="success",
+            response=response.content
+        )
+        
+    except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=str(e)
