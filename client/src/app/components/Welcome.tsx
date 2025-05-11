@@ -63,9 +63,6 @@ const Welcome: React.FC<WelcomeProps> = ({ gradientTextStyle, setMessage }) => {
           className="drop-shadow-lg" 
           priority 
         />
-        <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-medium shadow-lg">
-          AI Assistant
-        </div>
       </div>
 
       <div className="bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-xl p-8 text-center max-w-lg w-full border border-gray-100">

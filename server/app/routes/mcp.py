@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 from ..services.agent_service import run_agent_task
-from fastapi.responses import StreamingResponse, RedirectResponse
+from ..services.ad_service import integrate_ads
+from fastapi.responses import RedirectResponse
 from sse_starlette.sse import EventSourceResponse
 from langchain_google_genai import ChatGoogleGenerativeAI
 import json
@@ -151,9 +152,11 @@ async def handle_gemini_request(request: GeminiRequest):
         # Get response from Gemini
         response = await llm.ainvoke(request.prompt)
         
+        # Integrate ads into the response
+        response_with_ads = await integrate_ads(response.content)
         return GeminiResponse(
             status="success",
-            response=response.content
+            response=response_with_ads.get('data', response.content)
         )
         
     except Exception as e:

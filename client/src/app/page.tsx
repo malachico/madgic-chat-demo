@@ -184,28 +184,6 @@ export default function Home() {
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold" style={gradientTextStyle}>AI Assistant</h1>
-            <div className="flex items-center space-x-2 bg-gray-100 rounded-full p-1">
-              <button
-                onClick={() => setMode('agent')}
-                className={`px-4 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-                  mode === 'agent'
-                    ? 'bg-white shadow-sm text-purple-600'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                Agent
-              </button>
-              <button
-                onClick={() => setMode('chatbot')}
-                className={`px-4 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-                  mode === 'chatbot'
-                    ? 'bg-white shadow-sm text-purple-600'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                Chatbot
-              </button>
-            </div>
           </div>
           {chatHistory.length > 0 && (
             <button
@@ -256,6 +234,8 @@ export default function Home() {
             setMessage={setMessage}
             handleSubmit={handleSubmit}
             isLoading={isLoading}
+            mode={mode}
+            setMode={setMode}
           />
         </div>
       </div>

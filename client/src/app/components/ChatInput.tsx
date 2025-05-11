@@ -1,22 +1,33 @@
-import React, { FormEvent, ChangeEvent } from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
+import { FaComments, FaRobot } from 'react-icons/fa';
+import { Mode } from '../page';
 
 interface ChatInputProps {
   message: string;
   setMessage: (message: string) => void;
   handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void>;
   isLoading: boolean;
+  mode: Mode;
+  setMode: (mode: Mode) => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
   message,
   setMessage,
   handleSubmit,
-  isLoading
+  isLoading,
+  mode,
+  setMode
 }) => {
+
+  const handleModeClick = () => {
+    setMode(mode === 'agent' ? 'chatbot' : 'agent');
+  };
   return (
     <div className="w-full px-4">
       <form onSubmit={handleSubmit} className="flex items-center">
-        <div className="relative flex-1">
+        <div className="relative flex-1 flex items-center gap-2">
+          {/* Input */}
           <input
             type="text"
             value={message}
@@ -25,17 +36,18 @@ const ChatInput: React.FC<ChatInputProps> = ({
             className="w-full px-5 py-3 pr-14 bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent transition-all duration-200 text-gray-700"
             disabled={isLoading}
           />
-          {message.trim() && (
-            <button
-              type="button"
-              onClick={() => setMessage('')}
-              className="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </button>
-          )}
+          
+          {/* Mode Selector Chip */}
+          <button
+            type="button"
+            className={`absolute right-12 top-1/2 transform -translate-y-1/2 flex items-center gap-1 px-3 py-1 rounded-full border shadow-sm transition-colors duration-200 bg-purple-100 border-purple-400 text-purple-700`}
+            onClick={handleModeClick}
+            tabIndex={0}
+          >
+            {mode === 'agent' ? <FaRobot size={16} /> : <FaComments size={16} />}
+            <span className="capitalize text-sm">{mode}</span>
+          </button>
+          
           <button
             type="submit"
             disabled={isLoading || !message.trim()}
