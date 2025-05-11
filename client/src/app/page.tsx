@@ -16,7 +16,7 @@ const gradientTextStyle = {
   display: 'inline-block'
 };
 
-type Mode = 'agent' | 'chatbot';
+export type Mode = 'agent' | 'chatbot';
 
 export default function Home() {
   const [message, setMessage] = useState<string>("");
@@ -242,6 +242,7 @@ export default function Home() {
               thinking={msg.thinking}
               isStepsCompleted={msg.isStepsCompleted}
               steps={msg.steps}
+              mode={mode}
             />
           ))}
         </div>
