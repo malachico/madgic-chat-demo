@@ -1,5 +1,6 @@
 import { ChatMessageProps } from '../components/ChatMessage';
-
+import { StepType } from '../components/Step';
+import { Mode } from '../page';
 export interface SSEEvent {
   event: string;
   data: string;
@@ -65,9 +66,10 @@ export const updateChatMessage = (
   content: string,
   thinking: boolean,
   isStepsCompleted: boolean = false,
-  steps?: { title: string; content: string; isCompleted: boolean; isActive: boolean }[]
+  steps?: StepType[],
+  mode?: Mode
 ): ChatMessageProps[] => {
   return chatHistory.map((msg) =>
-    msg.id === id ? { ...msg, content, thinking, isStepsCompleted, steps } : msg
+    msg.id === id ? { ...msg, content, thinking, isStepsCompleted, steps, mode } : msg
   );
 }; 
