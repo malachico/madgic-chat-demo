@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import Skeleton from './Skeleton';
 import Step, { StepType } from './Step';
-import { Mode } from '../page';
+
 export interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
@@ -10,7 +10,6 @@ export interface ChatMessageProps {
   thinking?: boolean;
   isStepsCompleted?: boolean;
   steps?: StepType[];
-  mode?: Mode;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -20,7 +19,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   thinking = false,
   isStepsCompleted = false,
   steps = [],
-  mode = "agent"
 }) => {
   const [timestamp] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
 
@@ -86,10 +84,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       >
         {thinking ? (
           <>
-            <div className="flex items-center mb-3">
-              <div className="w-4 h-4 mr-2 rounded-full bg-purple-500 animate-pulse"></div>
-            </div>
-
             {/* Display steps while thinking */}
             <div className="space-y-4">
               {messageSteps.length > 0 ? (

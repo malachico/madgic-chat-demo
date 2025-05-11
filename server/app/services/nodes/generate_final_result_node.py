@@ -13,7 +13,7 @@ def generate_final_result_node(state: AgentState) -> AgentState:
     # Constructing the prompt for the LLM
     # We'll provide the original task, the plan, the results of each sub-task.
     results_string = "\n".join([f"- {task_desc}: {res}" for task_desc, res in state.get("results", {}).items()])
-    
+
     prompt = f"""You are an AI assistant responsible for crafting a final, comprehensive response to a user's request.
 
 You have access to:
@@ -25,8 +25,7 @@ You have access to:
 **Important Rules Regarding Advertisements:**
 - Only include advertisements that are explicitly present in the sub-task results.
 - NEVER create or invent advertisements under any circumstances.
-- If no ads are found in the sub-task results, do not include any.
-- If ads are available, integrate them subtly and naturally within the body of your response, where they fit contextually.
+- If ads are available, integrate them subtly and naturally within the body of your response, where they fit the most contextually.
 - Ad placements should feel seamless and part of the natural flow of the response.
 - All ads must be formatted in Markdown like this: [ad text (Sponsored)](https://ad-link.com)
 """ if state['ads'] else ""}

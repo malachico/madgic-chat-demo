@@ -220,7 +220,6 @@ export default function Home() {
               thinking={msg.thinking}
               isStepsCompleted={msg.isStepsCompleted}
               steps={msg.steps}
-              mode={mode}
             />
           ))}
         </div>
