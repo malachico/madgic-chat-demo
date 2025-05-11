@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
+
+export interface Step {
+  title: string;
+  content: string;
+  isCompleted: boolean;
+  isActive: boolean;
+  isFinal: boolean;
+}
+
 interface StepProps {
   title: string;
   content: string;

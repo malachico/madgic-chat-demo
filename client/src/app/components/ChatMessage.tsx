@@ -27,9 +27,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     // Simple parsing of markdown to extract steps
     const lines = content.split('\n');
-    const extractedSteps: { title: string; content: string; isCompleted: boolean; isActive: boolean }[] = [];
+    const extractedSteps: { title: string; content: string; isCompleted: boolean; isActive: boolean; isFinal?: boolean }[] = [];
 
-    let currentStep: { title: string; content: string; isCompleted: boolean; isActive: boolean } | null = null;
+    let currentStep: { title: string; content: string; isCompleted: boolean; isActive: boolean; isFinal?: boolean } | null = null;
 
     lines.forEach(line => {
       const stepMatch = line.match(/\*\*(.*?)\*\*/);
@@ -98,7 +98,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     content={step.content}
                     isCompleted={step.isCompleted}
                     isActive={step.isActive}
-                    isFinal={step.isFinal}
+                    isFinal={step.isFinal || false}
                   />
                 ))
               ) : (
@@ -125,6 +125,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     content={step.content}
                     isCompleted={true}
                     isActive={false}
+                    isFinal={step.isFinal || false}
                   />
                 ))}
               </div>

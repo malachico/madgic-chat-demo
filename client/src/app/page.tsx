@@ -5,6 +5,7 @@ import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
 import Welcome from './components/Welcome';
 import { sendAgentTask } from './services/api';
 import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
+import { Step } from "./components/Step";
 
 // Styles
 const gradientTextStyle = {
@@ -70,7 +71,7 @@ export default function Home() {
       const decoder = new TextDecoder();
       let currentThinking = "";
       let finalResponse = "";
-      let steps: any[] = [];
+      let steps: Step[] = [];
 
       while (true) {
         const { done, value } = await reader.read();

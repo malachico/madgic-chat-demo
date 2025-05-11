@@ -1,6 +1,5 @@
-import React, { JSX } from 'react';
 import Image from 'next/image';
-import Typewriter from 'typewriter-effect';
+import React, { JSX } from 'react';
 
 interface WelcomeProps {
   gradientTextStyle: React.CSSProperties;
