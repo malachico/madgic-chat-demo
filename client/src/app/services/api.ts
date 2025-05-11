@@ -12,7 +12,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
  */
 export const sendAgentTask = async (task: string, threadId?: string): Promise<Response> => {
   const response = await fetch(`${API_BASE_URL}/api/v1/mcp`, {
-    method: "POST",
+    method: "POST", 
     headers: {
       "Content-Type": "application/json"
     },

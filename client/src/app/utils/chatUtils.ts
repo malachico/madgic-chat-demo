@@ -56,6 +56,7 @@ export const formatStepResult = (stepResult: string): string => {
  * @param content - The new content for the message
  * @param thinking - Whether the message should show thinking state
  * @param isStepsCompleted - Whether the steps are completed for this message
+ * @param steps - Array of structured steps for the message
  * @returns Updated chat history array
  */
 export const updateChatMessage = (
@@ -63,9 +64,10 @@ export const updateChatMessage = (
   id: string,
   content: string,
   thinking: boolean,
-  isStepsCompleted: boolean = false
+  isStepsCompleted: boolean = false,
+  steps?: { title: string; content: string; isCompleted: boolean; isActive: boolean }[]
 ): ChatMessageProps[] => {
   return chatHistory.map((msg) =>
-    msg.id === id ? { ...msg, content, thinking, isStepsCompleted } : msg
+    msg.id === id ? { ...msg, content, thinking, isStepsCompleted, steps } : msg
   );
 }; 

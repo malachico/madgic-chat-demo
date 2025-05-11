@@ -1,11 +1,10 @@
 'use client'
-import { useState, useEffect, useRef, FormEvent } from "react";
-import { parseSSEEvents, formatStepResult, updateChatMessage as updateChat } from './utils/chatUtils';
-import { sendAgentTask } from './services/api';
-import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
+import { FormEvent, useEffect, useRef, useState } from "react";
 import ChatInput from './components/ChatInput';
+import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
 import Welcome from './components/Welcome';
-import SuggestionCards from './components/SuggestionCards';
+import { sendAgentTask } from './services/api';
+import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
 
 // Styles
 const gradientTextStyle = {
@@ -25,7 +24,10 @@ export default function Home() {
   // Auto-scroll to bottom of chat when messages change
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -68,6 +70,7 @@ export default function Home() {
       const decoder = new TextDecoder();
       let currentThinking = "";
       let finalResponse = "";
+      let steps: any[] = [];
 
       while (true) {
         const { done, value } = await reader.read();
@@ -80,8 +83,32 @@ export default function Home() {
           if (event.event === "update") {
             try {
               const data = JSON.parse(event.data);
-
               if (data.step && data.result) {
+                // Format the step result for display
+                const stepResult = formatStepResult(data.result);
+                
+                // Add to steps array for structured display
+                steps = [
+                  ...steps, 
+                  {
+                    title: data.step,
+                    content: stepResult,
+                    isCompleted: true,
+                    isActive: false,
+                    isFinal: data.is_final
+                  }
+                ];
+                
+                // Mark the latest step as active
+                if (steps.length > 0) {
+                  steps = steps.map((step, index) => ({
+                    ...step,
+                    isActive: index === steps.length - 1 && !data.is_final
+                  }));
+                }
+
+                // Update thinking content for legacy support
+                currentThinking = `${currentThinking}\n**${data.step}**:\n\`\`\`markdown\n${stepResult}\n\`\`\``;
 
                 if (data.is_final && data.final_result) {
                   finalResponse = data.final_result;
@@ -89,7 +116,7 @@ export default function Home() {
 
                   // Update the existing thinking message to stop thinking and mark steps as completed
                   setChatHistory((prev) =>
-                    updateChat(prev, responseId, currentThinking, false, true)
+                    updateChat(prev, responseId, currentThinking, false, true, steps)
                   );
 
                   // Create a new message for the final response with a new unique ID
@@ -98,17 +125,10 @@ export default function Home() {
                     ...prev,
                     { role: "assistant", content: finalResponse, id: finalMessageId, thinking: false }
                   ]);
-
                 } else {
-                  // Format the step result for display
-                  const stepResult = formatStepResult(data.result);
-
-                  // Update thinking content
-                  currentThinking = `${currentThinking}\n**${data.step}**:\n\`\`\`markdown\n${stepResult}\n\`\`\``;
-
-                  // Update the message in chat history
+                  // Update the message in chat history with structured steps
                   setChatHistory((prev) =>
-                    updateChat(prev, responseId, currentThinking, true)
+                    updateChat(prev, responseId, currentThinking, true, false, steps)
                   );
                 }
               }
@@ -141,33 +161,34 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-pink-50 to-purple-100">
-      {/* New Chat Button */}
-      {chatHistory.length > 0 && (
-        <div className="absolute top-4 right-4 z-10">
-          <button
-            onClick={handleNewChat}
-            className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200"
-          >
-            +
-          </button>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+      {/* Header area with new chat button */}
+      <header className="bg-white bg-opacity-80 backdrop-blur-sm border-b border-gray-200 py-3 px-6 z-10 sticky top-0">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-bold" style={gradientTextStyle}>AI Agent</h1>
+          {chatHistory.length > 0 && (
+            <button
+              onClick={handleNewChat}
+              className="bg-white text-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors duration-200 flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              New Chat
+            </button>
+          )}
         </div>
-      )}
+      </header>
 
       {/* Chat Container */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto py-6 px-4 sm:px-6 max-w-4xl mx-auto w-full"
+        className="flex-1 overflow-y-auto py-6 px-4 sm:px-6"
       >
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-3xl mx-auto">
           {/* Welcome Message */}
           {chatHistory.length === 0 && (
-            <Welcome gradientTextStyle={gradientTextStyle} />
-          )}
-
-          {/* Suggestion Cards */}
-          {chatHistory.length === 0 && (
-            <SuggestionCards setMessage={setMessage} />
+            <Welcome gradientTextStyle={gradientTextStyle} setMessage={setMessage} />
           )}
 
           {/* Chat Messages */}
@@ -179,22 +200,28 @@ export default function Home() {
               id={msg.id}
               thinking={msg.thinking}
               isStepsCompleted={msg.isStepsCompleted}
+              steps={msg.steps}
             />
           ))}
         </div>
       </div>
 
       {/* Input Area */}
-      <ChatInput
-        message={message}
-        setMessage={setMessage}
-        handleSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
+      <div className="sticky bottom-0 z-10 bg-white bg-opacity-80 backdrop-blur-sm border-t border-gray-200 py-3">
+        <div className="max-w-3xl mx-auto">
+          <ChatInput
+            message={message}
+            setMessage={setMessage}
+            handleSubmit={handleSubmit}
+            isLoading={isLoading}
+          />
+        </div>
+      </div>
 
       <style jsx global>{`
         .markdown-content a {
             text-decoration: underline;
+            color: #9333ea;
         }
         /* Add styles to wrap text in code blocks */
         .markdown-content pre,
@@ -204,6 +231,26 @@ export default function Home() {
             word-break: break-all; /* Break all characters if word-wrap is not enough */
             /* Remove potential default overflow-x */
             overflow-x: hidden;
+            background-color: rgba(249, 250, 251, 0.8);
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            border: 1px solid rgba(209, 213, 219, 0.5);
+        }
+        
+        /* Custom scrollbar for the chat container */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: rgba(243, 244, 246, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+          background: rgba(209, 213, 219, 0.7);
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(156, 163, 175, 0.8);
         }
       `}</style>
     </div>
