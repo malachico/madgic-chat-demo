@@ -104,7 +104,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                   />
                 ))
               ) : (
-                mode === "agent" && <Skeleton type="step" />
+                <Skeleton type="step" />
               )}
             </div>
           </>
