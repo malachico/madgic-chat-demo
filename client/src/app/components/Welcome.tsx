@@ -66,7 +66,8 @@ const Welcome: React.FC<WelcomeProps> = ({ gradientTextStyle, setMessage }) => {
       </div>
 
       <div className="bg-white bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-xl p-8 text-center max-w-lg w-full border border-gray-100">
-        <h1 className="text-2xl font-bold mb-6" style={gradientTextStyle}>Welcome to Your AI Agent</h1>   
+        <h1 className="text-2xl mb-6" style={gradientTextStyle}>This Agent is free because it is monetized by Madgic.ai!</h1>   
+        <h1 className="text-lg mb-6">Want to monetize your Agent? <br/><a href="https://publishersmadgic.ai/docs" className="text-blue-500 hover:text-blue-600">Check out the docs!</a></h1>   
         <div className="mt-8">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-center margin-auto-0">
