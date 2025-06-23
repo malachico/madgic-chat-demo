@@ -60,31 +60,31 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     return extractedSteps;
   };
+
   const messageSteps = steps.length > 0 ? steps.filter(step => !step.isFinal) : extractStepsFromContent();
 
   return (
-    <div
-      className={`flex ${role === "user" ? "justify-end" : "justify-start"} mb-6`}
-    >
-      {/* Avatar */}
-      <div className={`flex-shrink-0 ${role === "user" ? "order-2 ml-4" : "order-1 mr-4"}`}>
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center 
-          ${role === "user" ? "bg-pink-500" : "bg-purple-500"} text-white font-medium text-lg`}>
-          {role === "user" ? "U" : "A"}
+    <div className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}>
+      <div className={`flex max-w-[80%] ${role === "user" ? "flex-row-reverse" : "flex-row"} items-start space-x-3`}>
+        {/* Avatar */}
+        <div className={`flex-shrink-0 ${role === "user" ? "ml-3" : "mr-3"}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-white ${role === "user"
+              ? "bg-blue-600"
+              : "bg-gray-600"
+            }`}>
+            {role === "user" ? "You" : "AI"}
+          </div>
         </div>
-      </div>
 
-      {/* Message content */}
-      <div
-        id={id ? `msg-${id}` : undefined}
-        className={`max-w-[75%] rounded-2xl p-4 ${role === "user"
-            ? "order-1 bg-gradient-to-r from-pink-200 to-pink-300 text-gray-800"
-            : "order-2 bg-gradient-to-r from-purple-200 to-purple-300 text-gray-800"
-          } shadow-md`}
-      >
-        {thinking ? (
-          <>
-            {/* Display steps while thinking */}
+        {/* Message Content */}
+        <div
+          id={id ? `msg-${id}` : undefined}
+          className={`relative max-w-none ${role === "user"
+              ? "bg-white text-gray-900 rounded-2xl rounded-tr-md shadow-soft p-4"
+              : "text-gray-900"
+            }`}
+        >
+          {thinking ? (
             <div className="space-y-4">
               {messageSteps.length > 0 ? (
                 messageSteps.map((step, index) => (
@@ -98,46 +98,56 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                   />
                 ))
               ) : (
-                <Skeleton type="step" />
+                <div className="flex items-center space-x-3">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                  <span className="text-sm text-gray-500">Thinking...</span>
+                </div>
               )}
             </div>
-          </>
-        ) : isStepsCompleted ? (
-          <>
-            {/* Display completed steps in collapsed view */}
-            <div className="font-medium mb-2">Steps Completed</div>
-            <details className="mt-2 p-3 bg-white bg-opacity-50 rounded-lg shadow-sm">
-              <summary className="cursor-pointer font-medium text-sm text-gray-700 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                View Processing Steps
-              </summary>
-              <div className="mt-3 space-y-2">
-                {messageSteps.map((step, index) => (
-                  <Step
-                    key={index}
-                    title={step.title}
-                    content={step.content}
-                    isCompleted={true}
-                    isActive={false}
-                    isFinal={step.isFinal || false}
-                  />
-                ))}
+          ) : isStepsCompleted ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">Processing Complete</span>
+                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
               </div>
-            </details>
-          </>
-        ) : (
-          // Display final message content with typewriter effect
-          <div
-            id={id ? `msg-content-${id}` : undefined}
-            className="whitespace-pre-wrap markdown-content"
-          >
-            <ReactMarkdown>{content}</ReactMarkdown>
+              <details className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                <summary className="cursor-pointer text-sm font-medium text-gray-600 flex items-center space-x-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>View Processing Steps</span>
+                </summary>
+                <div className="mt-3 space-y-2">
+                  {messageSteps.map((step, index) => (
+                    <Step
+                      key={index}
+                      title={step.title}
+                      content={step.content}
+                      isCompleted={true}
+                      isActive={false}
+                      isFinal={step.isFinal || false}
+                    />
+                  ))}
+                </div>
+              </details>
+            </div>
+          ) : (
+            <div
+              id={id ? `msg-content-${id}` : undefined}
+              className="markdown-content prose prose-sm max-w-none"
+            >
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
+          )}
+
+          {/* Timestamp */}
+          <div className={`text-xs mt-3 text-gray-400`}>
+            {timestamp}
           </div>
-        )}
-        <div className="text-xs text-gray-500 mt-2 text-right">
-          {timestamp}
         </div>
       </div>
     </div>

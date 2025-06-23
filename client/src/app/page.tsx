@@ -178,22 +178,27 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
-      {/* Header area with new chat button and mode selection */}
-      <header className="bg-white bg-opacity-80 backdrop-blur-sm border-b border-gray-200 py-3 px-6 z-10 sticky top-0">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold" style={gradientTextStyle}>AI Assistant</h1>
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header */}
+      <header className="glass-surface border-b border-gray-200/50 px-6 py-4 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-3 3-3-3z" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-semibold text-gray-900">AI Assistant</h1>
           </div>
           {chatHistory.length > 0 && (
             <button
               onClick={handleNewChat}
-              className="bg-white text-gray-700 px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors duration-200 flex items-center"
+              className="px-4 py-2 bg-white text-gray-700 rounded-full shadow-soft border border-gray-200 hover:bg-gray-50 transition-quick flex items-center space-x-2 focus-ring"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              New Chat
+              <span className="text-sm font-medium">New Chat</span>
             </button>
           )}
         </div>
@@ -202,32 +207,37 @@ export default function Home() {
       {/* Chat Container */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto py-6 px-4 sm:px-6"
+        className="flex-1 overflow-y-auto"
       >
-        <div className="space-y-6 max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto px-6 py-8">
           {/* Welcome Message */}
           {chatHistory.length === 0 && (
-            <Welcome gradientTextStyle={gradientTextStyle} setMessage={setMessage} />
+            <div className="animate-fade-in">
+              <Welcome setMessage={setMessage} />
+            </div>
           )}
 
           {/* Chat Messages */}
-          {chatHistory.map((msg, index) => (
-            <ChatMessage
-              key={index}
-              role={msg.role}
-              content={msg.content}
-              id={msg.id}
-              thinking={msg.thinking}
-              isStepsCompleted={msg.isStepsCompleted}
-              steps={msg.steps}
-            />
-          ))}
+          <div className="space-y-6">
+            {chatHistory.map((msg, index) => (
+              <div key={index} className="animate-slide-up">
+                <ChatMessage
+                  role={msg.role}
+                  content={msg.content}
+                  id={msg.id}
+                  thinking={msg.thinking}
+                  isStepsCompleted={msg.isStepsCompleted}
+                  steps={msg.steps}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 z-10 bg-white bg-opacity-80 backdrop-blur-sm border-t border-gray-200 py-3">
-        <div className="max-w-3xl mx-auto">
+      <div className="glass-surface border-t border-gray-200/50 px-6 py-4 sticky bottom-0 z-50">
+        <div className="max-w-4xl mx-auto">
           <ChatInput
             message={message}
             setMessage={setMessage}
@@ -238,42 +248,6 @@ export default function Home() {
           />
         </div>
       </div>
-
-      <style jsx global>{`
-        .markdown-content a {
-            text-decoration: underline;
-            color: #9333ea;
-        }
-        /* Add styles to wrap text in code blocks */
-        .markdown-content pre,
-        .markdown-content code {
-            white-space: pre-wrap; /* Ensure text wraps */
-            overflow-wrap: break-word; /* Break long words if necessary */
-            word-break: break-all; /* Break all characters if word-wrap is not enough */
-            /* Remove potential default overflow-x */
-            overflow-x: hidden;
-            background-color: rgba(249, 250, 251, 0.8);
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            font-size: 0.875rem;
-            border: 1px solid rgba(209, 213, 219, 0.5);
-        }
-        
-        /* Custom scrollbar for the chat container */
-        ::-webkit-scrollbar {
-          width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-          background: rgba(243, 244, 246, 0.5);
-        }
-        ::-webkit-scrollbar-thumb {
-          background: rgba(209, 213, 219, 0.7);
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: rgba(156, 163, 175, 0.8);
-        }
-      `}</style>
     </div>
   );
 }

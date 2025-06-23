@@ -35,47 +35,64 @@ const Step: React.FC<StepProps> = ({ title, content, isCompleted, isActive, isLa
   }, [isCompleted]);
 
   return (
-    <div className={`
-      width-100% relative p-4 rounded-lg border-l-4 mb-4 transition-all duration-300
-      ${isCompleted ? 'border-green-500 bg-green-50' : 
-        isActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50'}
-    `}>
-      <div 
-        className="flex items-center mb-2 cursor-pointer"
+    <div className={`relative bg-white rounded-xl border transition-smooth ${
+      isCompleted ? 'border-green-200 shadow-soft' : 
+      isActive ? 'border-blue-200 shadow-soft' : 'border-gray-200'
+    }`}>
+      <button 
+        className="w-full p-4 text-left focus-ring rounded-xl transition-quick"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        <div className={`
-          w-6 h-6 rounded-full flex items-center justify-center mr-3
-          ${isCompleted ? 'bg-green-500 text-white' : 
-            isActive ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}
-        `}>
-          {isCompleted ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          ) : (
-            <span className="text-xs font-semibold">{isActive ? '...' : '○'}</span>
-          )}
+        <div className="flex items-center space-x-3">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-smooth ${
+            isCompleted ? 'bg-green-100 text-green-600' : 
+            isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
+          }`}>
+            {isCompleted ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : isActive ? (
+              <div className="flex space-x-px">
+                <div className="w-1 h-1 bg-current rounded-full animate-bounce"></div>
+                <div className="w-1 h-1 bg-current rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-1 h-1 bg-current rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              </div>
+            ) : (
+              <div className="w-2 h-2 bg-current rounded-full"></div>
+            )}
+          </div>
+          
+          <h3 className={`font-medium text-sm flex-grow transition-smooth ${
+            isCompleted ? 'text-green-700' : 
+            isActive ? 'text-blue-700' : 'text-gray-700'
+          }`}>
+            {title}
+          </h3>
+          
+          <svg 
+            className={`w-5 h-5 text-gray-400 transition-smooth ${
+              isCollapsed ? 'rotate-0' : 'rotate-180'
+            }`}
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
-        <h3 className={`font-medium text-sm flex-grow ${isCompleted ? 'text-green-700' : isActive ? 'text-blue-700' : 'text-gray-700'}`}>
-          {title}
-        </h3>
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          className={`h-5 w-5 transition-transform duration-200 ${isCollapsed ? 'transform rotate-180' : ''}`}
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </div>
-      <div className={`
-        ml-9 overflow-hidden transition-all duration-300
-        ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'}
-      `}>
-        <div className={`text-sm ${isCompleted ? 'text-green-700' : isActive ? 'text-blue-700' : 'text-gray-600'}`}>
-          <ReactMarkdown>{content}</ReactMarkdown>
+      </button>
+      
+      <div className={`overflow-hidden transition-smooth ${
+        isCollapsed ? 'max-h-0' : 'max-h-[500px]'
+      }`}>
+        <div className="px-4 pb-4">
+          <div className={`pl-9 text-sm leading-relaxed markdown-content ${
+            isCompleted ? 'text-green-700' : 
+            isActive ? 'text-blue-700' : 'text-gray-600'
+          }`}>
+            <ReactMarkdown>{content}</ReactMarkdown>
+          </div>
         </div>
       </div>
     </div>
