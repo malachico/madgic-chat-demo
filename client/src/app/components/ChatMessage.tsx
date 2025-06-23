@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import Skeleton from './Skeleton';
 import Step, { StepType } from './Step';
+import { TbUser } from "react-icons/tb";
+import { RiRobot3Line } from "react-icons/ri";
+
 
 export interface ChatMessageProps {
   role: "user" | "assistant";
@@ -72,7 +74,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               ? "bg-blue-600"
               : "bg-gray-600"
             }`}>
-            {role === "user" ? "You" : "AI"}
+            {role === "user" ? <TbUser /> : <RiRobot3Line />}
           </div>
         </div>
 

@@ -97,18 +97,25 @@ const Welcome: React.FC<WelcomeProps> = ({ setMessage }) => {
         <div className="inline-flex items-center space-x-2 bg-white rounded-full px-6 py-3 shadow-soft border border-gray-200/50">
           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           <span className="text-sm text-gray-600 font-medium">
-            This Agent is free because it is monetized by Madgic.ai
+            This Agent is free because it is monetized by
           </span>
-        </div>
-        <p className="text-sm text-gray-500 mt-4">
-          Want to monetize your Agent?{' '}
           <a 
-            href="https://publishersmadgic.ai/docs" 
+            href="https://madgic.ai" 
             className="text-blue-600 hover:text-blue-700 transition-quick font-medium"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Check out the docs
+            Madgic.ai
+          </a>
+        </div>
+        <p className="text-sm text-gray-500 mt-4">
+          <a 
+            href="https://publishers.madgic.ai" 
+            className="text-blue-600 hover:text-blue-700 transition-quick font-medium"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Want to monetize your Agent?
           </a>
         </p>
       </div>

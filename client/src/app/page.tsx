@@ -6,15 +6,7 @@ import Welcome from './components/Welcome';
 import { sendAgentTask, sendChatbotQuery } from './services/api';
 import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
 import { StepType } from "./components/Step";
-
-// Styles
-const gradientTextStyle = {
-  background: 'linear-gradient(90deg, #9333ea, #ec4899)',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  backgroundClip: 'text',
-  display: 'inline-block'
-};
+import { RiRobot2Line } from "react-icons/ri";
 
 export type Mode = 'agent' | 'chatbot';
 
@@ -184,11 +176,9 @@ export default function Home() {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-3 3-3-3z" />
-              </svg>
+              <RiRobot2Line className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-semibold text-gray-900">AI Assistant</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Madgic Chat</h1>
           </div>
           {chatHistory.length > 0 && (
             <button
@@ -236,7 +226,7 @@ export default function Home() {
       </div>
 
       {/* Input Area */}
-      <div className="glass-surface border-t border-gray-200/50 px-6 py-4 sticky bottom-0 z-50">
+      <div className="bg-transparent px-6 pb-4 sticky bottom-0 z-50">
         <div className="max-w-4xl mx-auto">
           <ChatInput
             message={message}
