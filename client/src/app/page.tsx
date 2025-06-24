@@ -1,12 +1,12 @@
 'use client'
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { RiRobot2Line } from "react-icons/ri";
 import ChatInput from './components/ChatInput';
 import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
+import { StepType } from "./components/Step";
 import Welcome from './components/Welcome';
 import { sendAgentTask, sendChatbotQuery } from './services/api';
 import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
-import { StepType } from "./components/Step";
-import { RiRobot2Line } from "react-icons/ri";
 
 export type Mode = 'agent' | 'chatbot';
 
@@ -94,7 +94,7 @@ export default function Home() {
                   
                   // Mark the latest step as active
                   if (steps.length > 0) {
-                    steps = steps.map((step, index) => ({ ...step }));
+                    steps = steps.map((step) => ({ ...step }));
                   }
 
                   // Update thinking content for legacy support
