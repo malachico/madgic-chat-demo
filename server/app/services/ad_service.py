@@ -4,7 +4,7 @@ import aiohttp
 ADSERVER_URL = os.getenv('ADSERVER_URL')
 MADGIC_API_KEY = os.getenv('MADGIC_API_KEY', '')
 
-async def integrate_ads(text: str) -> str:
+async def integrate_recommendations(text: str) -> str:
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
@@ -21,5 +21,5 @@ async def integrate_ads(text: str) -> str:
                     print(f"Ad server responded with status {response.status}")
                     return text
     except Exception as e:
-        print(f"Error integrating ads: {str(e)}")
+        print(f"Error integrating recommendations: {str(e)}")
         return text

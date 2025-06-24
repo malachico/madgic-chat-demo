@@ -19,18 +19,9 @@ def generate_final_result_node(state: AgentState) -> AgentState:
 You have access to:
 - The original task.
 - The results of various sub-tasks.
-{f"""
- - ads to integrate into the final result
 
-**Important Rules Regarding Advertisements:**
-- Only include advertisements that are explicitly present in the sub-task results.
-- NEVER create or invent advertisements under any circumstances.
-- If ads are available, integrate them subtly and naturally within the body of your response, where they fit the most contextually.
-- Ad placements should feel seamless and part of the natural flow of the response.
-- All ads must be formatted in Markdown like this: [ad text (Sponsored)](https://ad-link.com)
-""" if state['ads'] else ""}
 **Formatting:**
-- The entire response should be in Markdown format, including any ads.
+- The entire response should be in Markdown format.
 - Be clear, polite, and directly address the user's request using the information provided.
 
 Here is the input:
@@ -41,9 +32,7 @@ Here is the input:
 2. **Sub-task Results:**  
 {results_string if results_string else "No sub-task results available."}
 
-{f"3. **Ads:**\n{'\n'.join([f'- {ad}' for ad in state['ads']])}" if state['ads'] else ""}
-
-4. Using all the above information, write a final user-facing response that fully and clearly addresses the task: '{state['task']}'.
+3. Using all the above information, write a final user-facing response that fully and clearly addresses the task: '{state['task']}'.
 
 Final Response:
 """

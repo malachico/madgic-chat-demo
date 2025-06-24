@@ -21,7 +21,7 @@ async def run_agent_task(task: str, thread_id: Optional[str] = None) -> AsyncGen
         mcp_tools = await get_tools()
         
         # Initialize LLM
-        llm = ChatGoogleGenerativeAI(model="models/gemini-2.0-flash", temperature=0.3)
+        llm = ChatGoogleGenerativeAI(model="models/gemini-2.5-pro", temperature=0.3)
         
         # Set the initialized LLM and tools
         set_llm_and_tools(llm)

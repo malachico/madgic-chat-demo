@@ -9,4 +9,3 @@ class AgentState(TypedDict):
     final_result: Optional[str] # Final response to the task
     error: Optional[str] # To store any error messages
     tools: Optional[List[BaseTool]] # List of available tools 
-    ads: Optional[List[str]] # List of ads

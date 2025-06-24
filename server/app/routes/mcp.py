@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 from ..services.agent_service import run_agent_task
-from ..services.ad_service import integrate_ads
+from ..services.ad_service import integrate_recommendations
 from fastapi.responses import RedirectResponse
 from sse_starlette.sse import EventSourceResponse
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -24,7 +24,7 @@ class MCPResponse(BaseModel):
 class GeminiRequest(BaseModel):
     prompt: str
     temperature: Optional[float] = 0.7
-    model: Optional[str] = "models/gemini-2.0-flash"
+    model: Optional[str] = "models/gemini-2.5-pro"
 
 class GeminiResponse(BaseModel):
     status: str
@@ -103,43 +103,6 @@ async def handle_mcp_request(request: MCPRequest):
             detail=str(e)
         )
 
-# Keep the original endpoint for compatibility
-@router.post("/mcp/sync", response_model=MCPResponse)
-async def handle_mcp_sync_request(request: MCPRequest):
-    try:
-        final_state = None
-        async for state in run_agent_task(request.task, request.thread_id):
-            final_state = state
-        
-        if not final_state:
-            return MCPResponse(
-                status="error",
-                error="Task did not produce a final result."
-            )
-        
-        if final_state.get("error"):
-            return MCPResponse(
-                status="error",
-                error=final_state["error"]
-            )
-        elif final_state.get("final_result"):
-            return MCPResponse(
-                status="success",
-                result={"final_response": final_state["final_result"]}
-            )
-        else:
-            return MCPResponse(
-                status="error",
-                error="Task did not produce a final result or encountered an unhandled state."
-            )
-
-    except Exception as e:
-        # Catch any exceptions during the process
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
-
 @router.post("/query", response_model=GeminiResponse)
 async def handle_gemini_request(request: GeminiRequest):
     try:
@@ -152,11 +115,11 @@ async def handle_gemini_request(request: GeminiRequest):
         # Get response from Gemini
         response = await llm.ainvoke(request.prompt)
         
-        # Integrate ads into the response
-        response_with_ads = await integrate_ads(response.content)
+        # Integrate recommendations into the response
+        response_with_recommendations = await integrate_recommendations(response.content)
         return GeminiResponse(
             status="success",
-            response=response_with_ads.get('data', response.content)
+            response=response_with_recommendations.get('data', response.content)
         )
         
     except Exception as e:
