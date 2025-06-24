@@ -24,7 +24,7 @@ class MCPResponse(BaseModel):
 class GeminiRequest(BaseModel):
     prompt: str
     temperature: Optional[float] = 0.7
-    model: Optional[str] = "models/gemini-2.5-pro"
+    model: Optional[str] = "models/gemini-2.5-flash"
 
 class GeminiResponse(BaseModel):
     status: str
