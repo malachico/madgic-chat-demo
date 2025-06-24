@@ -29,9 +29,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     // Simple parsing of markdown to extract steps
     const lines = content.split('\n');
-    const extractedSteps: { title: string; content: string; isCompleted: boolean; isActive: boolean; isFinal?: boolean }[] = [];
+    const extractedSteps: { title: string; content: string; isFinal?: boolean }[] = [];
 
-    let currentStep: { title: string; content: string; isCompleted: boolean; isActive: boolean; isFinal?: boolean } | null = null;
+    let currentStep: { title: string; content: string; isFinal?: boolean } | null = null;
 
     lines.forEach(line => {
       const stepMatch = line.match(/\*\*(.*?)\*\*/);
@@ -42,8 +42,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         currentStep = {
           title: stepMatch[1],
           content: '',
-          isCompleted: true,
-          isActive: false
         };
       } else if (currentStep) {
         currentStep.content += line + '\n';
@@ -52,12 +50,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     if (currentStep) {
       extractedSteps.push(currentStep);
-    }
-
-    // Mark the last step as active if we're still thinking
-    if (extractedSteps.length > 0 && thinking) {
-      extractedSteps[extractedSteps.length - 1].isCompleted = false;
-      extractedSteps[extractedSteps.length - 1].isActive = true;
     }
 
     return extractedSteps;
@@ -94,8 +86,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     key={index}
                     title={step.title}
                     content={step.content}
-                    isCompleted={step.isCompleted}
-                    isActive={step.isActive}
                     isFinal={step.isFinal || false}
                   />
                 ))
@@ -106,7 +96,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
-                  <span className="text-sm text-gray-500">Thinking...</span>
                 </div>
               )}
             </div>
@@ -129,8 +118,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                       key={index}
                       title={step.title}
                       content={step.content}
-                      isCompleted={true}
-                      isActive={false}
                       isFinal={step.isFinal || false}
                     />
                   ))}

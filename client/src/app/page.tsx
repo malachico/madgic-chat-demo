@@ -88,18 +88,13 @@ export default function Home() {
                     {
                       title: data.step,
                       content: stepResult,
-                      isCompleted: true,
-                      isActive: false,
                       isFinal: data.is_final
                     }
                   ];
                   
                   // Mark the latest step as active
                   if (steps.length > 0) {
-                    steps = steps.map((step, index) => ({
-                      ...step,
-                      isActive: index === steps.length - 1 && !data.is_final
-                    }));
+                    steps = steps.map((step, index) => ({ ...step }));
                   }
 
                   // Update thinking content for legacy support
