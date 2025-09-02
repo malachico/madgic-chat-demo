@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import Step, { StepType } from './Step';
 import { TbUser } from "react-icons/tb";
 import { RiRobot3Line } from "react-icons/ri";
+import { Mode } from '../page';
 
 
 export interface ChatMessageProps {
@@ -12,6 +13,7 @@ export interface ChatMessageProps {
   thinking?: boolean;
   isStepsCompleted?: boolean;
   steps?: StepType[];
+  mode?: Mode;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -21,6 +23,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   thinking = false,
   isStepsCompleted = false,
   steps = [],
+  mode = 'chatbot',
 }) => {
   const [timestamp] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }));
 
@@ -80,26 +83,46 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         >
           {thinking ? (
             <div className="space-y-4">
-              {messageSteps.length > 0 ? (
-                messageSteps.map((step, index) => (
-                  <Step
-                    key={index}
-                    title={step.title}
-                    content={step.content}
-                    isFinal={step.isFinal || false}
-                  />
-                ))
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              {mode === 'agent' ? (
+                // Agent mode: Show steps or loading
+                messageSteps.length > 0 ? (
+                  messageSteps.map((step, index) => (
+                    <Step
+                      key={index}
+                      title={step.title}
+                      content={step.content}
+                      isFinal={step.isFinal || false}
+                    />
+                  ))
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
                   </div>
+                )
+              ) : (
+                // Chatbot mode: Show streaming text with cursor
+                <div className="markdown-content prose prose-sm max-w-none">
+                  <ReactMarkdown>{content}</ReactMarkdown>
+                  {content && (
+                    <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse"></span>
+                  )}
+                  {!content && (
+                    <div className="flex items-center space-x-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          ) : isStepsCompleted ? (
+          ) : isStepsCompleted && mode === 'agent' ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">Processing Complete</span>

@@ -1,7 +1,8 @@
 import React, { ChangeEvent, FormEvent, useState } from 'react';
-import { Mode } from '../page';
+import { Mode, StreamMode } from '../page';
 import { RiRobot2Line } from "react-icons/ri";
 import { BsChatDots } from "react-icons/bs";
+import { TbWaveSine } from "react-icons/tb";
 
 interface ChatInputProps {
   message: string;
@@ -10,6 +11,8 @@ interface ChatInputProps {
   isLoading: boolean;
   mode: Mode;
   setMode: (mode: Mode) => void;
+  streamMode: StreamMode;
+  setStreamMode: (streamMode: StreamMode) => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -18,7 +21,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
   handleSubmit,
   isLoading,
   mode,
-  setMode
+  setMode,
+  streamMode,
+  setStreamMode
 }) => {
   const [showModePopup, setShowModePopup] = useState(false);
 
@@ -29,6 +34,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
     // Show popup indication
     setShowModePopup(true);
     setTimeout(() => setShowModePopup(false), 2000);
+  };
+
+  const handleStreamToggle = () => {
+    const newStreamMode = streamMode === 'stream' ? 'normal' : 'stream';
+    setStreamMode(newStreamMode);
   };
 
   return (
@@ -58,6 +68,21 @@ const ChatInput: React.FC<ChatInputProps> = ({
             )}
             {/* <span className="capitalize">{mode}</span> */}
           </button>
+
+          {/* Stream Mode Toggle - Only show for chatbot mode */}
+          {mode === 'chatbot' && (
+            <button
+              type="button"
+              onClick={handleStreamToggle}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-quick focus-ring flex items-center space-x-2 shadow-soft ${
+                streamMode === 'stream' 
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <TbWaveSine className="w-4 h-4" />
+            </button>
+          )}
           
           {/* Send Button */}
           <button

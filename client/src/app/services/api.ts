@@ -48,6 +48,27 @@ export const sendChatbotQuery = async (prompt: string) => {
 };
 
 /**
+ * Send a query to the chatbot with streaming response
+ * @param prompt - The prompt to send to the chatbot
+ * @returns Response readable stream for SSE processing
+ */
+export const sendChatbotQueryStream = async (prompt: string): Promise<Response> => {
+  const response = await fetch(`${API_BASE_URL}/api/v1/query/stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ prompt })
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response;
+};
+
+/**
  * Send a task to the MCP agent synchronously (non-streaming)
  * @param task - The task to send to the agent
  * @param threadId - Optional thread ID for conversation tracking

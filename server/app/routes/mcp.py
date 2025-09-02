@@ -126,4 +126,73 @@ async def handle_gemini_request(request: GeminiRequest):
         raise HTTPException(
             status_code=500,
             detail=str(e)
+        )
+
+@router.post("/query/stream")
+async def handle_gemini_stream_request(request: GeminiRequest):
+    try:
+        # Create an async generator that yields SSE events for streaming Gemini responses
+        async def event_generator():
+            try:
+                # Initialize Gemini model
+                llm = ChatGoogleGenerativeAI(
+                    model=request.model,
+                    temperature=request.temperature
+                )
+                
+                full_response = ""
+                
+                # Stream response from Gemini
+                async for chunk in llm.astream(request.prompt):
+                    if hasattr(chunk, 'content') and chunk.content:
+                        full_response += chunk.content
+                        
+                        # Send each chunk as an SSE event
+                        yield {
+                            "event": "update",
+                            "data": json.dumps({
+                                "status": "streaming",
+                                "chunk": chunk.content,
+                                "full_response": full_response,
+                                "is_final": False
+                            })
+                        }
+                        
+                        # Small delay to prevent overwhelming the client
+                        await asyncio.sleep(0.01)
+                
+                # Integrate recommendations into the final response
+                response_with_recommendations = await integrate_recommendations(full_response)
+                final_response = response_with_recommendations.get('data', full_response)
+                
+                # Send final event with complete response
+                yield {
+                    "event": "update", 
+                    "data": json.dumps({
+                        "status": "success",
+                        "chunk": "",
+                        "full_response": final_response,
+                        "is_final": True
+                    })
+                }
+                
+            except Exception as e:
+                # Send any unexpected errors as events
+                yield {
+                    "event": "error",
+                    "data": json.dumps({
+                        "status": "error",
+                        "error": str(e),
+                        "is_final": True
+                    })
+                }
+
+        # Return a streaming response with SSE events
+        return EventSourceResponse(event_generator())
+
+    except Exception as e:
+        # Handle exceptions outside the event stream
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
         ) 

@@ -5,16 +5,18 @@ import ChatInput from './components/ChatInput';
 import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
 import { StepType } from "./components/Step";
 import Welcome from './components/Welcome';
-import { sendAgentTask, sendChatbotQuery } from './services/api';
+import { sendAgentTask, sendChatbotQuery, sendChatbotQueryStream } from './services/api';
 import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
 
 export type Mode = 'agent' | 'chatbot';
+export type StreamMode = 'stream' | 'normal';
 
 export default function Home() {
   const [message, setMessage] = useState<string>("");
   const [chatHistory, setChatHistory] = useState<ChatMessageProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<Mode>('chatbot');
+  const [streamMode, setStreamMode] = useState<StreamMode>('normal');
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-scroll to bottom of chat when messages change
@@ -47,7 +49,7 @@ export default function Home() {
     const responseId = Date.now().toString();
     setChatHistory((prev) => [
       ...prev,
-      { role: "assistant", content: "", id: responseId, thinking: true }
+      { role: "assistant", content: "", id: responseId, thinking: true, mode }
     ]);
 
     setIsLoading(true);
@@ -136,23 +138,79 @@ export default function Home() {
         }
       } else {
         // Handle chatbot mode
-        const response = await sendChatbotQuery(message);
-        
-        if (response.status === 'success' && response.response) {
-          setChatHistory((prev) =>
-            updateChat(prev, responseId, response.response, false)
-          );
+        if (streamMode === 'stream') {
+          // Handle streaming chatbot mode
+          const response = await sendChatbotQueryStream(message);
+          const reader = response.body?.getReader();
+          if (!reader) {
+            throw new Error("Failed to get response reader");
+          }
+
+          const decoder = new TextDecoder();
+          let fullResponse = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const text = decoder.decode(value);
+            const events = parseSSEEvents(text);
+
+            for (const event of events) {
+              if (event.event === "update") {
+                try {
+                  const data = JSON.parse(event.data);
+                  
+                  if (data.status === "streaming" && data.chunk) {
+                    // Update with streaming chunk
+                    fullResponse = data.full_response || fullResponse + data.chunk;
+                    setChatHistory((prev) =>
+                      updateChat(prev, responseId, fullResponse, true, false, undefined, mode)
+                    );
+                  } else if (data.is_final) {
+                    // Final response received
+                    fullResponse = data.full_response || fullResponse;
+                    setChatHistory((prev) =>
+                      updateChat(prev, responseId, fullResponse, false, false, undefined, mode)
+                    );
+                    setIsLoading(false);
+                  }
+                } catch (err) {
+                  console.error("Error parsing SSE event data:", err);
+                }
+              } else if (event.event === "error") {
+                try {
+                  const data = JSON.parse(event.data);
+                  setChatHistory((prev) =>
+                    updateChat(prev, responseId, `Error: ${data.error}`, false, false, undefined, mode)
+                  );
+                  setIsLoading(false);
+                } catch (err) {
+                  console.error("Error parsing SSE error event:", err);
+                }
+              }
+            }
+          }
         } else {
-          setChatHistory((prev) =>
-            updateChat(prev, responseId, `Error: ${response.error || 'Unknown error'}`, false)
-          );
+          // Handle non-streaming chatbot mode
+          const response = await sendChatbotQuery(message);
+          
+          if (response.status === 'success' && response.response) {
+            setChatHistory((prev) =>
+              updateChat(prev, responseId, response.response, false, false, undefined, mode)
+            );
+          } else {
+            setChatHistory((prev) =>
+              updateChat(prev, responseId, `Error: ${response.error || 'Unknown error'}`, false, false, undefined, mode)
+            );
+          }
         }
       }
     } catch (error) {
       console.error("Error:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setChatHistory((prev) =>
-        updateChat(prev, responseId, `Error: ${errorMessage}`, false)
+        updateChat(prev, responseId, `Error: ${errorMessage}`, false, false, undefined, mode)
       );
     } finally {
       setIsLoading(false);
@@ -213,6 +271,7 @@ export default function Home() {
                   thinking={msg.thinking}
                   isStepsCompleted={msg.isStepsCompleted}
                   steps={msg.steps}
+                  mode={msg.mode || mode}
                 />
               </div>
             ))}
@@ -230,6 +289,8 @@ export default function Home() {
             isLoading={isLoading}
             mode={mode}
             setMode={setMode}
+            streamMode={streamMode}
+            setStreamMode={setStreamMode}
           />
         </div>
       </div>
