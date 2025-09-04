@@ -7,6 +7,7 @@ import { StepType } from "./components/Step";
 import Welcome from './components/Welcome';
 import { sendAgentTask, sendChatbotQuery, sendChatbotQueryStream } from './services/api';
 import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
+import Image from "next/image";
 
 export type Mode = 'agent' | 'chatbot';
 export type StreamMode = 'stream' | 'normal';
@@ -228,8 +229,8 @@ export default function Home() {
       <header className="glass-surface border-b border-gray-200/50 px-6 py-4 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <RiRobot2Line className="w-5 h-5 text-white" />
+            <div className="w-20 h-12 bg-gradient-to-br rounded-lg flex items-center justify-center">
+              <Image src="/logo.png" alt="Logo" width={60} height={36} />
             </div>
             <h1 className="text-xl font-semibold text-gray-900">Madgic Chat</h1>
           </div>
