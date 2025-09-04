@@ -1,8 +1,8 @@
 import React, { ChangeEvent, FormEvent, useState } from 'react';
-import { Mode, StreamMode } from '../page';
-import { RiRobot2Line } from "react-icons/ri";
 import { BsChatDots } from "react-icons/bs";
+import { RiRobot2Line } from "react-icons/ri";
 import { TbWaveSine } from "react-icons/tb";
+import { Mode, StreamMode } from '../page';
 
 interface ChatInputProps {
   message: string;

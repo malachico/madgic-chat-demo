@@ -1,13 +1,12 @@
 'use client'
+import Image from "next/image";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { RiRobot2Line } from "react-icons/ri";
 import ChatInput from './components/ChatInput';
 import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
 import { StepType } from "./components/Step";
 import Welcome from './components/Welcome';
 import { sendAgentTask, sendChatbotQuery, sendChatbotQueryStream } from './services/api';
 import { formatStepResult, parseSSEEvents, updateChatMessage as updateChat } from './utils/chatUtils';
-import Image from "next/image";
 
 export type Mode = 'agent' | 'chatbot';
 export type StreamMode = 'stream' | 'normal';
