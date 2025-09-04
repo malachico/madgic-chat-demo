@@ -56,32 +56,54 @@ const ChatInput: React.FC<ChatInputProps> = ({
           />
           
           {/* Mode Selector Button */}
-          <button
-            type="button"
-            onClick={handleModeClick}
-            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-quick focus-ring flex items-center space-x-2 shadow-soft"
-          >
-            {mode === 'agent' ? (
-              <RiRobot2Line className="w-4 h-4" />
-            ) : (
-              <BsChatDots className="w-4 h-4" />
-            )}
-            {/* <span className="capitalize">{mode}</span> */}
-          </button>
+          <div className="relative group">
+            <button
+              type="button"
+              onClick={handleModeClick}
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-quick focus-ring flex items-center space-x-2 shadow-soft"
+            >
+              {mode === 'agent' ? (
+                <RiRobot2Line className="w-4 h-4" />
+              ) : (
+                <BsChatDots className="w-4 h-4" />
+              )}
+              {/* <span className="capitalize">{mode}</span> */}
+            </button>
+            
+            {/* Tooltip */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              <div className="bg-gray-900 text-white px-3 py-2 rounded-lg shadow-large text-sm font-medium whitespace-nowrap">
+                {mode === 'agent' ? 'Agent' : 'Chatbot'}
+                {/* Tooltip arrow */}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          </div>
 
           {/* Stream Mode Toggle - Only show for chatbot mode */}
           {mode === 'chatbot' && (
-            <button
-              type="button"
-              onClick={handleStreamToggle}
-              className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-quick focus-ring flex items-center space-x-2 shadow-soft ${
-                streamMode === 'stream' 
-                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <TbWaveSine className="w-4 h-4" />
-            </button>
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={handleStreamToggle}
+                className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-quick focus-ring flex items-center space-x-2 shadow-soft ${
+                  streamMode === 'stream' 
+                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <TbWaveSine className="w-4 h-4" />
+              </button>
+              
+              {/* Tooltip */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <div className="bg-gray-900 text-white px-3 py-2 rounded-lg shadow-large text-sm font-medium whitespace-nowrap">
+                  {streamMode === 'stream' ? 'Stream' : 'Bulk'}
+                  {/* Tooltip arrow */}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                </div>
+              </div>
+            </div>
           )}
           
           {/* Send Button */}

@@ -16,7 +16,7 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState<ChatMessageProps[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [mode, setMode] = useState<Mode>('chatbot');
-  const [streamMode, setStreamMode] = useState<StreamMode>('normal');
+  const [streamMode, setStreamMode] = useState<StreamMode>('stream');
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-scroll to bottom of chat when messages change
