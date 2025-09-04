@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 from ..services.agent_service import run_agent_task
-from ..services.ad_service import integrate_recommendations
+from ..services.ad_service import integrate_recommendations, StreamingAdSession
 from fastapi.responses import RedirectResponse
 from sse_starlette.sse import EventSourceResponse
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -133,6 +133,7 @@ async def handle_gemini_stream_request(request: GeminiRequest):
     try:
         # Create an async generator that yields SSE events for streaming Gemini responses
         async def event_generator():
+            ad_session = None
             try:
                 # Initialize Gemini model
                 llm = ChatGoogleGenerativeAI(
@@ -140,19 +141,25 @@ async def handle_gemini_stream_request(request: GeminiRequest):
                     temperature=request.temperature
                 )
                 
+                # Initialize streaming ad session
+                ad_session = StreamingAdSession(content_type="chat", language="en")
+                await ad_session.initialize()
+                
                 full_response = ""
                 
-                # Stream response from Gemini
+                # Stream response from Gemini with ad integration
                 async for chunk in llm.astream(request.prompt):
                     if hasattr(chunk, 'content') and chunk.content:
-                        full_response += chunk.content
+                        # Process chunk through ad server immediately
+                        processed_chunk = await ad_session.process_chunk(chunk.content)
+                        full_response += processed_chunk
                         
-                        # Send each chunk as an SSE event
+                        # Send processed chunk as SSE event
                         yield {
                             "event": "update",
                             "data": json.dumps({
                                 "status": "streaming",
-                                "chunk": chunk.content,
+                                "chunk": processed_chunk,
                                 "full_response": full_response,
                                 "is_final": False
                             })
@@ -161,9 +168,9 @@ async def handle_gemini_stream_request(request: GeminiRequest):
                         # Small delay to prevent overwhelming the client
                         await asyncio.sleep(0.01)
                 
-                # Integrate recommendations into the final response
-                response_with_recommendations = await integrate_recommendations(full_response)
-                final_response = response_with_recommendations.get('data', full_response)
+                # Finalize the ad session
+                if ad_session:
+                    await ad_session.finalize()
                 
                 # Send final event with complete response
                 yield {
@@ -171,12 +178,16 @@ async def handle_gemini_stream_request(request: GeminiRequest):
                     "data": json.dumps({
                         "status": "success",
                         "chunk": "",
-                        "full_response": final_response,
+                        "full_response": full_response,
                         "is_final": True
                     })
                 }
                 
             except Exception as e:
+                # Cleanup ad session on error
+                if ad_session:
+                    await ad_session.finalize()
+                
                 # Send any unexpected errors as events
                 yield {
                     "event": "error",
