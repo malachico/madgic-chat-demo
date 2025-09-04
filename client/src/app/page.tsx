@@ -1,6 +1,6 @@
 'use client'
 import Image from "next/image";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import ChatInput from './components/ChatInput';
 import ChatMessage, { ChatMessageProps } from './components/ChatMessage';
 import { StepType } from "./components/Step";
@@ -18,6 +18,8 @@ export default function Home() {
   const [mode, setMode] = useState<Mode>('chatbot');
   const [streamMode, setStreamMode] = useState<StreamMode>('stream');
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
+  const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
 
   // Auto-scroll to bottom of chat when messages change
   const scrollToBottom = () => {
@@ -26,12 +28,39 @@ export default function Home() {
         top: chatContainerRef.current.scrollHeight,
         behavior: 'smooth'
       });
+      setIsAtBottom(true);
+      setShowScrollButton(false);
     }
   };
 
+  // Check if user is at bottom of scroll container
+  const checkScrollPosition = useCallback(() => {
+    if (chatContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+      const threshold = 100; // pixels from bottom
+      const atBottom = scrollHeight - scrollTop - clientHeight < threshold;
+      setIsAtBottom(atBottom);
+      setShowScrollButton(!atBottom && chatHistory.length > 0);
+    }
+  }, [chatHistory.length]);
+
+  // Auto-scroll only if user is at bottom
   useEffect(() => {
-    scrollToBottom();
-  }, [chatHistory]);
+    if (isAtBottom) {
+      scrollToBottom();
+    }
+  }, [chatHistory, isAtBottom]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const chatContainer = chatContainerRef.current;
+    if (chatContainer) {
+      chatContainer.addEventListener('scroll', checkScrollPosition);
+      return () => {
+        chatContainer.removeEventListener('scroll', checkScrollPosition);
+      };
+    }
+  }, [checkScrollPosition]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -278,6 +307,21 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Scroll to Bottom Button */}
+      {showScrollButton && (
+        <div className="fixed bottom-20 right-6 z-40">
+          <button
+            onClick={scrollToBottom}
+            className="bg-white text-gray-700 rounded-full shadow-lg border border-gray-200 hover:bg-gray-50 transition-quick p-3 focus-ring flex items-center justify-center"
+            title="Scroll to bottom"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Input Area */}
       <div className="bg-transparent px-6 pb-4 sticky bottom-0 z-50">
