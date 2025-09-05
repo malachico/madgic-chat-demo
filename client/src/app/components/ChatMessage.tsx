@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import Step, { StepType } from './Step';
-import { TbUser } from "react-icons/tb";
-import { RiRobot3Line } from "react-icons/ri";
 import { Mode } from '../page';
 
 
@@ -62,17 +60,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div className={`flex ${role === "user" ? "justify-end" : "justify-start"}`}>
-      <div className={`flex max-w-[80%] ${role === "user" ? "flex-row-reverse" : "flex-row"} items-start space-x-3`}>
-        {/* Avatar */}
-        <div className={`flex-shrink-0 ${role === "user" ? "ml-3" : "mr-3"}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-white ${role === "user"
-              ? "bg-blue-600"
-              : "bg-gray-600"
-            }`}>
-            {role === "user" ? <TbUser /> : <RiRobot3Line />}
-          </div>
-        </div>
-
+      <div className={`max-w-[80%]`}>
         {/* Message Content */}
         <div
           id={id ? `msg-${id}` : undefined}
