@@ -254,34 +254,27 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <header>
-  <div className="flex justify-between items-center">
-    <div className="flex items-center space-x-3">
-      <div>
-        <Image src="/logo.png" alt="Logo" width={60} height={36} />
-      </div>
-      <h1 className="text-xl font-semibold">Madgic Chat</h1>
-    </div>
-    {chatHistory.length > 0 && (
-      <button onClick={handleNewChat}>
-        <svg
-          className="w-4 h-4 inline-block mr-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-          />
-        </svg>
-        <span>New Chat</span>
-      </button>
-    )}
-  </div>
-</header>
+      <header className="px-6 py-2 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-12 bg-gradient-to-br rounded-lg flex items-center justify-center">
+              <Image src="/logo.png" alt="Logo" width={30} height={18} />
+            </div>
+            <h1 className="text-l font-semibold text-gray-900">Madgic Chat</h1>
+          </div>
+          {chatHistory.length > 0 && (
+            <button
+              onClick={handleNewChat}
+              className="px-2 py-1 bg-white text-gray-700 rounded-full shadow-soft border border-gray-200 hover:bg-gray-50 transition-quick flex items-center space-x-2 focus-ring"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span className="text-sm font-medium">New Chat</span>
+            </button>
+          )}
+        </div>
+      </header>
 
       {/* Chat Container */}
       <div
