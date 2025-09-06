@@ -145,16 +145,11 @@ async def handle_gemini_stream_request(request: GeminiRequest):
                 ad_session = StreamingAdSession(content_type="chat", language="en")
                 await ad_session.initialize()
                 
-                full_response = ""
-                last_processed_chunk = ""
-                
                 # Stream response from Gemini with ad integration
                 async for chunk in llm.astream(request.prompt):
                     if hasattr(chunk, 'content') and chunk.content:
                         # Process chunk through ad server immediately
                         processed_chunk = await ad_session.process_chunk(chunk.content)
-                        full_response += processed_chunk
-                        last_processed_chunk = processed_chunk
                         
                         # Send processed chunk as SSE event
                         yield {
@@ -162,7 +157,6 @@ async def handle_gemini_stream_request(request: GeminiRequest):
                             "data": json.dumps({
                                 "status": "streaming",
                                 "chunk": processed_chunk,
-                                "full_response": full_response,
                                 "is_final": False
                             })
                         }
@@ -174,13 +168,11 @@ async def handle_gemini_stream_request(request: GeminiRequest):
                 if ad_session:
                     await ad_session.finalize()
                 
-                # Send final event with the last chunk content (not empty)
+                # Send final event to indicate completion
                 yield {
                     "event": "update", 
                     "data": json.dumps({
                         "status": "success",
-                        "chunk": last_processed_chunk,
-                        "full_response": full_response,
                         "is_final": True
                     })
                 }

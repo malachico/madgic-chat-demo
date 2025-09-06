@@ -192,13 +192,12 @@ export default function Home() {
                   
                   if (data.status === "streaming" && data.chunk) {
                     // Update with streaming chunk
-                    fullResponse = data.full_response || fullResponse + data.chunk;
+                    fullResponse += data.chunk;
                     setChatHistory((prev) =>
                       updateChat(prev, responseId, fullResponse, true, false, undefined, mode)
                     );
                   } else if (data.is_final) {
-                    // Final response received
-                    fullResponse = data.full_response || fullResponse;
+                    // Final response received - just stop thinking indicator
                     setChatHistory((prev) =>
                       updateChat(prev, responseId, fullResponse, false, false, undefined, mode)
                     );
@@ -254,13 +253,12 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <header className="px-6 py-2 sticky top-0 z-50">
+      <header className="px-1 py-1 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-12 bg-gradient-to-br rounded-lg flex items-center justify-center">
               <Image src="/logo.png" alt="Logo" width={30} height={18} />
             </div>
-            <h1 className="text-l font-semibold text-gray-900">Madgic Chat</h1>
           </div>
           {chatHistory.length > 0 && (
             <button
